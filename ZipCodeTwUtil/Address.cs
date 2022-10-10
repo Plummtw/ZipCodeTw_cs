@@ -6,6 +6,18 @@ using System.Text.RegularExpressions;
 
 namespace ZipCodeTw
 {
+    public struct Tuple2<T1, T2>
+    {
+        public T1 Item1 { get; set; }
+        public T2 Item2 { get; set; }
+
+        public Tuple2(T1 item1, T2 item2)
+        {
+            Item1 = item1;
+            Item2 = item2;
+        }
+    }
+
     public class Address
     {
         public static Regex TOKEN_RE = new Regex(@"
@@ -82,10 +94,10 @@ namespace ZipCodeTw
             return TO_REPLACE_RE.Replace(s, Replace);
         }
 
-        public static List<(string, string, string, string)> Tokenize(string addr_str)
+        public static List<Tuple4<string, string, string, string>> Tokenize(string addr_str)
         {
             var tokens = TOKEN_RE.Matches(Normalize(addr_str));
-            var result = new List<(string, string, string, string)>();
+            var result = new List<Tuple4<string, string, string, string>>();
             foreach (Match token in tokens)
             {
                 var token1 = token.Groups[NO].Value;
@@ -93,12 +105,12 @@ namespace ZipCodeTw
                 var token3 = token.Groups[NAME].Value;
                 var token4 = token.Groups[UNIT].Value;
 
-                result.Add((token1, token2, token3, token4));
+                result.Add(new Tuple4<string, string, string, string>(token1, token2, token3, token4));
             }
             return result;
         }
 
-        private List<(string, string, string, string)> _tokens;
+        private List<Tuple4<string, string, string, string>> _tokens;
 
         public Address() { }
 
@@ -112,12 +124,12 @@ namespace ZipCodeTw
             _tokens = Tokenize(addrStr);
         }
 
-        public List<(string, string, string, string)> Tokens
+        public List<Tuple4<string, string, string, string>> Tokens
         {
             get
             {
                 if (_tokens == null)
-                    return new List<(string, string, string, string)>();
+                    return new List<Tuple4<string, string, string, string>>();
                 return _tokens;
             }
         }
@@ -243,12 +255,12 @@ namespace ZipCodeTw
             return c1[0] < c2[0] || (c1[0] == c2[0] && c1[1] <= c2[1]);
         }
 
-        public static bool operator ==(AddrTuple c1, (int, int) c2)
+        public static bool operator ==(AddrTuple c1, Tuple2<int, int> c2)
         {
             return c1[0] == c2.Item1 && c1[1] == c2.Item2;
         }
 
-        public static bool operator !=(AddrTuple c1, (int, int) c2)
+        public static bool operator !=(AddrTuple c1, Tuple2<int, int> c2)
         {
             return !(c1 == c2);
         }

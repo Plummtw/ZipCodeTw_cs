@@ -4,6 +4,52 @@ using System.Text.RegularExpressions;
 
 namespace ZipCodeTw
 {
+    public struct Tuple4<T1, T2, T3, T4>
+    {
+        public T1 Item1 { get; set; }
+        public T2 Item2 { get; set; }
+        public T3 Item3 { get; set; }
+        public T4 Item4 { get; set; }
+
+        public Tuple4(T1 item1, T2 item2, T3 item3, T4 item4)
+        {
+            Item1 = item1;
+            Item2 = item2;
+            Item3 = item3;
+            Item4 = item4;
+        }
+
+        public static bool operator ==(Tuple4<T1,T2,T3,T4> c1, Tuple4<T1, T2, T3, T4> c2)
+        {
+            return c1.Item1.Equals(c2.Item1) && c1.Item2.Equals(c2.Item2) && 
+                c1.Item3.Equals(c2.Item3) && c1.Item4.Equals(c2.Item4);
+        }
+
+        public static bool operator !=(Tuple4<T1, T2, T3, T4> c1, Tuple4<T1, T2, T3, T4> c2)
+        {
+            return !(c1 == c2);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Tuple4<T1, T2, T3, T4> tuple &&
+                   EqualityComparer<T1>.Default.Equals(Item1, tuple.Item1) &&
+                   EqualityComparer<T2>.Default.Equals(Item2, tuple.Item2) &&
+                   EqualityComparer<T3>.Default.Equals(Item3, tuple.Item3) &&
+                   EqualityComparer<T4>.Default.Equals(Item4, tuple.Item4);
+        }
+
+        public override int GetHashCode()
+        {
+            int hashCode = -1041475770;
+            hashCode = hashCode * -1521134295 + EqualityComparer<T1>.Default.GetHashCode(Item1);
+            hashCode = hashCode * -1521134295 + EqualityComparer<T2>.Default.GetHashCode(Item2);
+            hashCode = hashCode * -1521134295 + EqualityComparer<T3>.Default.GetHashCode(Item3);
+            hashCode = hashCode * -1521134295 + EqualityComparer<T4>.Default.GetHashCode(Item4);
+            return hashCode;
+        }
+    }
+
     public class Rule : Address
     {
         public static Regex RULE_TOKEN_RE = new Regex(@"
@@ -16,7 +62,7 @@ namespace ZipCodeTw
             [連至單雙全](?=[\d全]|$)
         ", RegexOptions.IgnorePatternWhitespace);
 
-        public static (HashSet<string>, string) Part(string ruleStr)
+        public static Tuple2<HashSet<string>, string> Part(string ruleStr)
         {
             ruleStr = Normalize(ruleStr);
             HashSet<string> ruleTokens = new HashSet<string>();
@@ -46,7 +92,7 @@ namespace ZipCodeTw
 
             var addrStr = RULE_TOKEN_RE.Replace(ruleStr, Extract);
 
-            return (ruleTokens, addrStr);
+            return new Tuple2<HashSet<string>, string>(ruleTokens, addrStr);
         }
 
         protected HashSet<string> _ruleTokens = new HashSet<string>();
@@ -54,7 +100,9 @@ namespace ZipCodeTw
 
         public Rule(string ruleStr)
         {
-            (_ruleTokens, _addrStr) = Part(ruleStr);
+            var rule = Part(ruleStr);
+            _ruleTokens = rule.Item1;
+            _addrStr = rule.Item2;
             base.Initialize(_addrStr);
         }
 
@@ -88,7 +136,7 @@ namespace ZipCodeTw
 
             // # check the rule tokens
             var hisNoPair = addr.Parse(myLastPos + 1);
-            if (_ruleTokens.Count > 0 && hisNoPair == (0, 0))
+            if (_ruleTokens.Count > 0 && hisNoPair == new Tuple2<int, int>(0, 0))
                 return false;
 
             var myNoPair = this.Parse(-1);
