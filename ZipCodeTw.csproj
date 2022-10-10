@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>ZipCodeTw</RootNamespace>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>This is a port from Mosky's zipcodetw (Python Library).</Description>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Copyright>MIT</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Data.SQLite" Version="1.0.116" />
+  </ItemGroup>
+
+</Project>
